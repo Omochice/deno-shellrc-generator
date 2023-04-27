@@ -1,5 +1,5 @@
-import { parse } from "https://deno.land/std@0.157.0/encoding/toml.ts";
-import { deepMerge } from "https://deno.land/std@0.166.0/collections/deep_merge.ts";
+import { parse } from "https://deno.land/std@0.184.0/encoding/toml.ts";
+import { deepMerge } from "https://deno.land/std@0.184.0/collections/deep_merge.ts";
 import { schema } from "./schema.ts";
 import type { Schema } from "./schema.ts";
 import { err, ok, Result } from "./deps.ts";

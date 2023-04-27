@@ -58,10 +58,10 @@ export function topologicalSort<T extends GraphNode>(graph: T[]): T[] {
   return Array.from(topologicalSortIter(graph));
 }
 
-type GraphNode = {
+export interface GraphNode {
   to?: number[];
-};
+}
 
-type HasIndegree = {
+interface HasIndegree {
   indegree: number;
-};
+}

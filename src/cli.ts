@@ -1,7 +1,7 @@
 import { z } from "https://deno.land/x/zod@v3.21.4/mod.ts";
-import { basename } from "https://deno.land/std@0.157.0/path/mod.ts";
+import { basename } from "https://deno.land/std@0.184.0/path/mod.ts";
 import { err, ok, Result } from "npm:neverthrow@6.0.0";
-import { parse } from "https://deno.land/std@0.157.0/flags/mod.ts";
+import { parse } from "https://deno.land/std@0.184.0/flags/mod.ts";
 import { loadConfigure } from "./toml.ts";
 import { generate } from "./generate.ts";
 import { shell as supportedShell } from "./schema.ts";
