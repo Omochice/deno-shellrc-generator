@@ -48,8 +48,7 @@ ${thisFile} - Commandline minutes generator for me
 \t--shell: shell type. default: ${defaultShell}
 \t--help -h: Show this message.
 `;
-    // return err(new Error(helpMessage));
-    return err(helpMessage);
+    return err(new Error(helpMessage));
   }
 
   if (parseResult.data._.length === 0) {
@@ -70,14 +69,19 @@ async function main(): Promise<Result<string, unknown>> {
     return err(tomlResult.error);
   }
   // NOTE: generate rc body
-  return generate(tomlResult.value, arg.value.shell);
+  const generateResult = generate(tomlResult.value, arg.value.shell);
+  if (generateResult.isErr()) {
+    return err(generateResult.error);
+  }
+  return ok(generateResult.value);
 }
 
-const result = await main();
-if (result.isErr()) {
-  console.error(result.error);
-  Deno.exit(2);
-} else {
-  console.log(result.value);
+if (import.meta.main) {
+  const result = await main();
+  if (result.isErr()) {
+    console.error(result.error);
+    Deno.exit(2);
+  } else {
+    console.log(result.value);
+  }
 }
-

@@ -23,7 +23,7 @@ export type Shell = z.infer<typeof shell>;
 
 // NOTE: from Deno.build.arch
 const arch = z.union([
-  z.literal("x84_64"),
+  z.literal("x86_64"),
   z.literal("aarch64"),
 ]);
 

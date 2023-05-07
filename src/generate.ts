@@ -1,5 +1,3 @@
-import { z } from "https://deno.land/x/zod@v3.21.4/mod.ts";
-import { Queue } from "https://deno.land/x/yocto_queue@v0.1.4/mod.ts";
 import type {
   Alias,
   Environment,
@@ -11,6 +9,7 @@ import type {
 } from "./schema.ts";
 import { Converter, getShell } from "./shell.ts";
 import { err, ok, Result } from "./deps.ts";
+import { GraphNode, topologicalSort } from "./sort.ts";
 
 export function generate(
   configure: Schema,
@@ -29,56 +28,35 @@ export function generate(
   const converter = r.value;
   const convertResult = convertToEvals(configure, converter);
 
-  const filtered = convertResult.filter((
-    evaluate: Evaluate,
-  ) => (
-    evaluate.shell == null ||
-    evaluate.shell === shell ||
-    evaluate.shell.includes(shell)
-  ));
+  const filtered = convertResult
+    .filter((
+      e: Evaluate,
+    ) => (
+      e.shell == null ||
+      e.shell === shell ||
+      e.shell.includes(shell)
+    ))
+    .filter((e: Evaluate) => (
+      e.arch == null ||
+      e.arch === Deno.build.arch ||
+      e.arch.includes(Deno.build.arch)
+    ))
+    .filter((e: Evaluate) => (
+      e.os == null ||
+      e.os === Deno.build.os ||
+      e.os.includes(Deno.build.os)
+    ))
+    .map((e: Evaluate) => normalizeIf(e, converter))
+    .map(normalizeDepends)
+    .map(normalizeLabel);
 
-  const dumped: string[] = [];
-  const dumpedLabels: Set<string> = new Set([""]);
-  const queue = new Queue<Evaluate>();
-  queue.enqueue(
-    ...filtered
-      .map(normalizeDepends)
-      .map((e) => normalizeIf(e, converter))
-      .map(normalizeLabel),
-  );
-  while (queue.size > 1) {
-    let dumpledByCurrentIter = 0;
-    for (let _ = 0; _ < queue.size; _++) {
-      const popped = queue.dequeue();
-      if (popped === undefined) {
-        break;
-      }
-
-      const dependsParseResult = z.string().array().safeParse(popped.depends);
-      if (!dependsParseResult.success) {
-        return err(dependsParseResult.error);
-      }
-
-      const depends = dependsParseResult.data;
-      if (!depends.every((d) => dumpedLabels.has(d))) {
-        queue.enqueue(popped);
-        continue;
-      }
-      const labelParseResult = z.string().safeParse(popped.label);
-      if (!labelParseResult.success) {
-        return err(labelParseResult.error);
-      }
-      const label = labelParseResult.data;
-      dumpedLabels.add(label);
-      dumped.push(popped.command);
-      dumpledByCurrentIter += 1;
-    }
-    if (dumpledByCurrentIter === 0) {
-      return err(new Error("Too recursivery"));
-    }
+  const sorted = topologicalSort(convertToGraphNode(filtered));
+  if (sorted.length !== filtered.length) {
+    return err(
+      new Error("The configure file may includes circly dependencies"),
+    );
   }
-  // return dumped
-  return ok(dumped.join("\n"));
+  return ok(sorted.map((e) => e.command).join("\n"));
 }
 
 function convertToEvals(
@@ -128,7 +106,7 @@ function normalizeDepends(
   return {
     ...evaluate,
     depends: evaluate.depends == null
-      ? [""]
+      ? []
       : Array.isArray(evaluate.depends)
       ? evaluate.depends
       : [evaluate.depends],
@@ -158,4 +136,32 @@ function normalizeLabel(evaluate: Evaluate): Evaluate & { label: string } {
     ...evaluate,
     label,
   };
+}
+
+function convertToGraphNode(nodes: Evaluate[]): (Evaluate & GraphNode)[] {
+  return nodes.map((e: Evaluate) => {
+    if (e.label == null) {
+      return {
+        ...e,
+        to: [],
+      };
+    }
+
+    const to: number[] = [];
+    for (const [idx, evaluate] of nodes.entries()) {
+      if (evaluate.depends == null) continue;
+      if (evaluate.depends === e.label) {
+        to.push(idx);
+        continue;
+      }
+      if (evaluate.depends.includes(e.label)) {
+        to.push(idx);
+        continue;
+      }
+    }
+    return {
+      ...e,
+      to,
+    };
+  });
 }
