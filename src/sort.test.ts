@@ -1,4 +1,4 @@
-import { assert } from "https://deno.land/std@0.184.0/testing/asserts.ts";
+import { assert } from "https://deno.land/std@0.196.0/testing/asserts.ts";
 import { topologicalSort } from "./sort.ts";
 
 Deno.test("topologicalSort", async (t) => {

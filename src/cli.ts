@@ -1,77 +1,44 @@
-import { z } from "https://deno.land/x/zod@v3.21.4/mod.ts";
-import { basename } from "https://deno.land/std@0.184.0/path/mod.ts";
-import { err, ok, Result } from "npm:neverthrow@6.0.0";
-import { parse } from "https://deno.land/std@0.184.0/flags/mod.ts";
+import { err, ok, Result } from "npm:neverthrow@6.0.1-0";
+import { basename } from "https://deno.land/std@0.196.0/path/mod.ts";
+import {
+  Command,
+  EnumType,
+} from "https://deno.land/x/cliffy@v1.0.0-rc.2/command/mod.ts";
+import { ShellName, SupportedShells } from "./shell/mod.ts";
 import { loadConfigure } from "./toml.ts";
 import { generate } from "./generate.ts";
-import { shell as supportedShell } from "./schema.ts";
 
-const argumentSchema = z.object({
-  _: z.array(z.string()),
-  help: z.boolean(),
-  shell: supportedShell,
-});
+const shellType = new EnumType<ShellName>(SupportedShells);
 
-type Schema = z.infer<typeof argumentSchema>;
-
-const defaultShell = Deno.env.get("SHELL");
-
-function parseArgs(args: string[]): Result<Schema, unknown> {
-  const parseResult = argumentSchema.safeParse(
-    parse(args, {
-      default: {
-        help: false,
-        shell: defaultShell,
+async function main(): Promise<Result<string, Error>> {
+  const thisFile = basename(import.meta.url);
+  const { options, args } = await new Command()
+    .name(thisFile)
+    .type("shell", shellType)
+    .arguments("<files...>")
+    .option(
+      "--shell, <shell:shell>",
+      "shell name that used to convert configure files.",
+      {
+        required: true,
       },
-      boolean: ["help"],
-      alias: { h: "help" },
-    }),
-  );
+    )
+    .option("--out <out:string>", "output filename")
+    .parse(Deno.args);
 
-  if (!parseResult.success) {
-    console.log();
-    return err(new Error(parseResult.error.toString()));
-  }
-
-  if (parseResult.data.help) {
-    const thisFile = basename(import.meta.url);
-    const helpMessage = `
-${thisFile} - Commandline minutes generator for me
-
-[USASE]
-\t${thisFile} template... [OPTIONS]
-
-[ARGUMENTS]
-\ttemplate: Path to template, it must TOML format.
-
-[OPTIONS]
-\t--shell: shell type. default: ${defaultShell}
-\t--help -h: Show this message.
-`;
-    return err(new Error(helpMessage));
-  }
-
-  if (parseResult.data._.length === 0) {
-    return err(new Error("argument must has any"));
-  }
-  return ok(parseResult.data);
-}
-
-async function main(): Promise<Result<string, unknown>> {
-  // NOTE: parse arguments
-  const arg = parseArgs(Deno.args);
-  if (arg.isErr()) {
-    return err(arg.error);
-  }
-  // NOTE: parse TOML
-  const tomlResult = await loadConfigure(arg.value._);
+  const tomlResult = await loadConfigure(args);
   if (tomlResult.isErr()) {
     return err(tomlResult.error);
   }
-  // NOTE: generate rc body
-  const generateResult = generate(tomlResult.value, arg.value.shell);
+
+  const generateResult = generate(tomlResult.value, options.shell);
   if (generateResult.isErr()) {
     return err(generateResult.error);
+  }
+
+  if (options.out) {
+    Deno.writeTextFileSync(options.out, generateResult.value);
+    return ok("");
   }
   return ok(generateResult.value);
 }
@@ -79,9 +46,9 @@ async function main(): Promise<Result<string, unknown>> {
 if (import.meta.main) {
   const result = await main();
   if (result.isErr()) {
-    console.error(result.error);
-    Deno.exit(2);
-  } else {
-    console.log(result.value);
+    console.error(result.error.message);
+    Deno.exit(1);
   }
+
+  console.log(result.value);
 }

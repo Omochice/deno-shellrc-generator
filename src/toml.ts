@@ -1,8 +1,8 @@
-import { parse } from "https://deno.land/std@0.184.0/toml/parse.ts";
-import { deepMerge } from "https://deno.land/std@0.184.0/collections/deep_merge.ts";
+import { parse } from "https://deno.land/std@0.196.0/toml/parse.ts";
+import { deepMerge } from "https://deno.land/std@0.196.0/collections/deep_merge.ts";
 import { schema } from "./schema.ts";
 import type { Schema } from "./schema.ts";
-import { err, ok, Result } from "./deps.ts";
+import { err, ok, Result } from "npm:neverthrow@6.0.1-0";
 
 /**
  * load toml file
@@ -17,7 +17,7 @@ async function loadToml(path: string): Promise<Record<string, unknown>> {
 
 export async function loadConfigure(
   paths: string[],
-): Promise<Result<Schema, unknown>> {
+): Promise<Result<Schema, Error>> {
   return await Promise.all(paths.map((p) => loadToml(p)))
     .then((value) => {
       return value.reduce((prev, curr) => deepMerge(prev, curr));
@@ -26,6 +26,6 @@ export async function loadConfigure(
       return ok(schema.parse(merged));
     })
     .catch((e: unknown) => {
-      return err(e);
+      return err(new Error("Error occured to load tomls", { cause: e }));
     });
 }
