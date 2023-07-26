@@ -1,5 +1,5 @@
-import { err, ok, Result } from "npm:neverthrow@6.0.0";
-import { basename } from "https://deno.land/std@0.184.0/path/mod.ts";
+import { err, ok, Result } from "npm:neverthrow@6.0.1-0";
+import { basename } from "https://deno.land/std@0.196.0/path/mod.ts";
 import {
   Command,
   EnumType,

@@ -1,4 +1,4 @@
-import { err, ok, Result } from "npm:neverthrow@6.0.0";
+import { err, ok, Result } from "npm:neverthrow@6.0.1-0";
 import { bash } from "./bash.ts";
 import { zsh } from "./zsh.ts";
 import { fish } from "./fish.ts";
