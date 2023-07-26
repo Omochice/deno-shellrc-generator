@@ -2,7 +2,7 @@ import { parse } from "https://deno.land/std@0.184.0/toml/parse.ts";
 import { deepMerge } from "https://deno.land/std@0.184.0/collections/deep_merge.ts";
 import { schema } from "./schema.ts";
 import type { Schema } from "./schema.ts";
-import { err, ok, Result } from "./deps.ts";
+import { err, ok, Result } from "npm:neverthrow@6.0.0";
 
 /**
  * load toml file

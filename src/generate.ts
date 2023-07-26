@@ -9,7 +9,7 @@ import type {
 } from "./schema.ts";
 import { Converter } from "./shell/type.ts";
 import { getShell } from "./shell/mod.ts";
-import { err, ok, Result } from "./deps.ts";
+import { err, ok, Result } from "npm:neverthrow@6.0.0";
 import { GraphNode, topologicalSort } from "./sort.ts";
 
 export function generate(
