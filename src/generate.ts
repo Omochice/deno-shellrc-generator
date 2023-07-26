@@ -14,7 +14,7 @@ import { GraphNode, topologicalSort } from "./sort.ts";
 export function generate(
   configure: Schema,
   shell: Shell,
-): Result<string, unknown> {
+): Result<string, Error> {
   /*
    * NOTE: steps
    * - transform other to evaluate

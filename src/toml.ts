@@ -17,7 +17,7 @@ async function loadToml(path: string): Promise<Record<string, unknown>> {
 
 export async function loadConfigure(
   paths: string[],
-): Promise<Result<Schema, unknown>> {
+): Promise<Result<Schema, Error>> {
   return await Promise.all(paths.map((p) => loadToml(p)))
     .then((value) => {
       return value.reduce((prev, curr) => deepMerge(prev, curr));
@@ -26,6 +26,6 @@ export async function loadConfigure(
       return ok(schema.parse(merged));
     })
     .catch((e: unknown) => {
-      return err(e);
+      return err(new Error("Error occured to load tomls", { cause: e }));
     });
 }
