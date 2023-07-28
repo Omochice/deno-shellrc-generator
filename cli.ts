@@ -4,9 +4,9 @@ import {
   Command,
   EnumType,
 } from "https://deno.land/x/cliffy@v1.0.0-rc.2/command/mod.ts";
-import { ShellName, SupportedShells } from "./shell/mod.ts";
-import { loadConfigure } from "./toml.ts";
-import { generate } from "./generate.ts";
+import { ShellName, SupportedShells } from "./src/shell/mod.ts";
+import { loadConfigure } from "./src/toml.ts";
+import { generate } from "./src/generate.ts";
 
 const shellType = new EnumType<ShellName>(SupportedShells);
 
