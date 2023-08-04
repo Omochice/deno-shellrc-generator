@@ -11,11 +11,12 @@ import { Converter } from "./shell/type.ts";
 import { getShell } from "./shell/mod.ts";
 import { err, ok, Result } from "npm:neverthrow@6.0.1-0";
 import { GraphNode, topologicalSort } from "./sort.ts";
+import { isWsl } from "https://deno.land/x/is_wsl@v1.1.0/mod.ts";
 
-export function generate(
+export async function generate(
   configure: Schema,
   shell: Shell,
-): Result<string, Error> {
+): Promise<Result<string, Error>> {
   /*
    * NOTE: steps
    * - transform other to evaluate
@@ -28,6 +29,8 @@ export function generate(
   }
   const converter = r.value;
   const convertResult = convertToEvals(configure, converter);
+
+  const os = (await isWsl()) ? "wsl" : Deno.build.os;
 
   const filtered = convertResult
     .filter((
@@ -44,8 +47,8 @@ export function generate(
     ))
     .filter((e: Execute) => (
       e.os == null ||
-      e.os === Deno.build.os ||
-      e.os.includes(Deno.build.os)
+      e.os === os ||
+      e.os.includes(os)
     ))
     .map((e: Execute) => normalizeIf(e, converter))
     .map(normalizeDepends)

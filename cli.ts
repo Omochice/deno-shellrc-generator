@@ -31,7 +31,7 @@ async function main(): Promise<Result<string, Error>> {
     return err(tomlResult.error);
   }
 
-  const generateResult = generate(tomlResult.value, options.shell);
+  const generateResult = await generate(tomlResult.value, options.shell);
   if (generateResult.isErr()) {
     return err(generateResult.error);
   }
