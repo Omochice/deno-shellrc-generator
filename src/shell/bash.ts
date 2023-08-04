@@ -9,5 +9,5 @@ export const bash: Converter = {
   alias: (from: string, to: string) => `alias ${to} ${from}`,
   environment: (from: string, to: string) => `export ${to}=${from}`,
   path: (path: string) => `export PATH=${path}:\$PATH`,
-  evaluate: (command: string) => command,
+  execute: (command: string) => command,
 } as const;

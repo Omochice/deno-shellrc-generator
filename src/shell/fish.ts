@@ -9,5 +9,5 @@ export const fish: Converter = {
   environment: (from: string, to: string) =>
     `set --export --unpath ${to} ${from}`,
   path: (path: string) => `set --path PATH \$PATH ${path}`,
-  evaluate: (command: string) => command,
+  execute: (command: string) => command,
 } as const;

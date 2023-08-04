@@ -1,7 +1,7 @@
 import type {
   Alias,
   Environment,
-  Evaluate,
+  Execute,
   Path,
   Schema,
   Shell,
@@ -31,23 +31,23 @@ export function generate(
 
   const filtered = convertResult
     .filter((
-      e: Evaluate,
+      e: Execute,
     ) => (
       e.shell == null ||
       e.shell === shell ||
       e.shell.includes(shell)
     ))
-    .filter((e: Evaluate) => (
+    .filter((e: Execute) => (
       e.arch == null ||
       e.arch === Deno.build.arch ||
       e.arch.includes(Deno.build.arch)
     ))
-    .filter((e: Evaluate) => (
+    .filter((e: Execute) => (
       e.os == null ||
       e.os === Deno.build.os ||
       e.os.includes(Deno.build.os)
     ))
-    .map((e: Evaluate) => normalizeIf(e, converter))
+    .map((e: Execute) => normalizeIf(e, converter))
     .map(normalizeDepends)
     .map(normalizeLabel);
 
@@ -63,9 +63,9 @@ export function generate(
 function convertToEvals(
   configure: Schema,
   converter: Converter,
-): Evaluate[] {
+): Execute[] {
   return [
-    ...configure.evaluates ?? [],
+    ...configure.executes ?? [],
     ...sourceToEval(converter, configure.sources ?? []),
     ...aliasToEval(converter, configure.aliases ?? []),
     ...environmentToEval(converter, configure.environments ?? []),
@@ -73,13 +73,13 @@ function convertToEvals(
   ];
 }
 
-function sourceToEval(converter: Converter, sources: Source[]): Evaluate[] {
+function sourceToEval(converter: Converter, sources: Source[]): Execute[] {
   return sources.map((s: Source) => ({
     ...s,
     command: converter.source(s.path),
   }));
 }
-function aliasToEval(converter: Converter, aliases: Alias[]): Evaluate[] {
+function aliasToEval(converter: Converter, aliases: Alias[]): Execute[] {
   return aliases.map((a: Alias) => ({
     ...a,
     command: converter.alias(a.from, a.to),
@@ -88,13 +88,13 @@ function aliasToEval(converter: Converter, aliases: Alias[]): Evaluate[] {
 function environmentToEval(
   converter: Converter,
   environments: Environment[],
-): Evaluate[] {
+): Execute[] {
   return environments.map((e: Environment) => ({
     ...e,
     command: converter.environment(e.from, e.to),
   }));
 }
-function pathToEval(converter: Converter, paths: Path[]): Evaluate[] {
+function pathToEval(converter: Converter, paths: Path[]): Execute[] {
   return paths.map((p: Path) => ({
     ...p,
     command: converter.path(p.path),
@@ -102,8 +102,8 @@ function pathToEval(converter: Converter, paths: Path[]): Evaluate[] {
 }
 
 function normalizeDepends(
-  evaluate: Evaluate,
-): Evaluate & { depends: string[] } {
+  evaluate: Execute,
+): Execute & { depends: string[] } {
   return {
     ...evaluate,
     depends: evaluate.depends == null
@@ -115,9 +115,9 @@ function normalizeDepends(
 }
 
 function normalizeIf(
-  evaluate: Evaluate,
+  evaluate: Execute,
   converter: Converter,
-): Evaluate {
+): Execute {
   let command = evaluate.command;
   if (evaluate.if_executable != null) {
     command = converter.ifExecutable(evaluate.if_executable, command);
@@ -131,7 +131,7 @@ function normalizeIf(
   };
 }
 
-function normalizeLabel(evaluate: Evaluate): Evaluate & { label: string } {
+function normalizeLabel(evaluate: Execute): Execute & { label: string } {
   const label = evaluate.label ?? "";
   return {
     ...evaluate,
@@ -139,8 +139,8 @@ function normalizeLabel(evaluate: Evaluate): Evaluate & { label: string } {
   };
 }
 
-function convertToGraphNode(nodes: Evaluate[]): (Evaluate & GraphNode)[] {
-  return nodes.map((e: Evaluate) => {
+function convertToGraphNode(nodes: Execute[]): (Execute & GraphNode)[] {
+  return nodes.map((e: Execute) => {
     if (e.label == null) {
       return {
         ...e,

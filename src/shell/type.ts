@@ -5,5 +5,5 @@ export type Converter = {
   alias: (from: string, to: string) => string;
   environment: (from: string, to: string) => string;
   path: (path: string) => string;
-  evaluate: (command: string) => string;
+  execute: (command: string) => string;
 };

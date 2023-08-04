@@ -59,16 +59,16 @@ const source = option.merge(z.object({
 }));
 export type Source = z.infer<typeof source>;
 
-export const evaluate = option.merge(z.object({
+export const execute = option.merge(z.object({
   command: z.string(),
 }));
-export type Evaluate = z.infer<typeof evaluate>;
+export type Execute = z.infer<typeof execute>;
 
 export const schema = z.object({
   paths: z.optional(z.array(path)),
   environments: z.optional(z.array(environment)),
   aliases: z.optional(z.array(alias)),
   sources: z.optional(z.array(source)),
-  evaluates: z.optional(z.array(evaluate)),
+  executes: z.optional(z.array(execute)),
 });
 export type Schema = z.infer<typeof schema>;
