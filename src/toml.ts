@@ -1,8 +1,8 @@
-import { parse } from "https://deno.land/std@0.196.0/toml/parse.ts";
-import { deepMerge } from "https://deno.land/std@0.196.0/collections/deep_merge.ts";
+import { parse } from "jsr:@std/toml@1.0.1/parse";
+import { deepMerge } from "jsr:@std/collections@1.0.7/deep-merge";
 import { schema } from "./schema.ts";
 import type { Schema } from "./schema.ts";
-import { err, ok, Result } from "npm:neverthrow@6.0.1-0";
+import { err, ok, Result } from "npm:neverthrow@8.0.0";
 
 /**
  * load toml file

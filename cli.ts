@@ -1,9 +1,6 @@
-import { err, ok, Result } from "npm:neverthrow@6.0.1-0";
-import { basename } from "https://deno.land/std@0.196.0/path/mod.ts";
-import {
-  Command,
-  EnumType,
-} from "https://deno.land/x/cliffy@v1.0.0-rc.2/command/mod.ts";
+import { err, ok, Result } from "npm:neverthrow@8.0.0";
+import { basename } from "jsr:@std/path@1.0.6";
+import { Command, EnumType } from "jsr:@cliffy/command@1.0.0-rc.5";
 import { ShellName, SupportedShells } from "./src/shell/mod.ts";
 import { loadConfigure } from "./src/toml.ts";
 import { generate } from "./src/generate.ts";

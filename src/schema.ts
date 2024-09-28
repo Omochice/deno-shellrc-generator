@@ -1,4 +1,4 @@
-import { z } from "https://deno.land/x/zod@v3.21.4/mod.ts";
+import { z } from "npm:zod@3.23.8";
 
 // NOTE: from Deno.build.os + "wsl"
 const os = z.union([

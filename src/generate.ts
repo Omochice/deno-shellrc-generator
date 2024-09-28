@@ -9,7 +9,7 @@ import type {
 } from "./schema.ts";
 import { Converter } from "./shell/type.ts";
 import { getShell } from "./shell/mod.ts";
-import { err, ok, Result } from "npm:neverthrow@6.0.1-0";
+import { err, ok, Result } from "npm:neverthrow@8.0.0";
 import { GraphNode, topologicalSort } from "./sort.ts";
 import { isWsl } from "https://deno.land/x/is_wsl@v1.1.0/mod.ts";
 
