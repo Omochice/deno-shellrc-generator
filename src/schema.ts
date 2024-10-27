@@ -17,6 +17,7 @@ export const shell = z.union([
   z.literal("bash"),
   z.literal("zsh"),
   z.literal("fish"),
+  z.literal("nu"),
 ]);
 
 export type Shell = z.infer<typeof shell>;
